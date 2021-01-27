@@ -1,42 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Select, InputNumber } from 'antd';
-import { CheckCircleTwoTone } from '@ant-design/icons';
+import { CheckCircleTwoTone, MinusCircleTwoTone } from '@ant-design/icons';
 import axios from 'axios';
 
 import './StockInputForm.css';
-import { blue } from '@ant-design/colors';
+import { blue, red } from '@ant-design/colors';
 
-const StockInputForm = ({ label, handleChange }) => {
+const StockInputForm = ({ label, updateRow, deleteRow }) => {
   const name = 'NIFTY';
   const [selected, setSelected] = useState(false);
   const [data, setData] = useState([]);
-  const [strikePrice, setStrikePrice] = useState(
-    localStorage.getItem(`${label}.strikePrice`) || '',
-  );
-  const [expiry, setExpiry] = useState(localStorage.getItem(`${label}.expiry`) || '');
-  const [quantity, setQuantity] = useState(localStorage.getItem(`${label}.quantity`) || 75);
-  const [iType, setIType] = useState(localStorage.getItem(`${label}.iType`) || 'CE');
+  const [strikePrice, setStrikePrice] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [quantity, setQuantity] = useState(75);
+  const [iType, setIType] = useState('CE');
   const transactionType = 'BUY';
 
   useEffect(() => {
     axios.get('http://localhost:4400/mapper/byName', { params: { name: name } }).then((result) => {
       setData(result.data);
     });
-  }, [name]);
+  }, []);
 
   useEffect(() => {
     setSelected(false);
     const x = data.find((d) => d.tradingsymbol === `${name}${expiry}${strikePrice}${iType}`);
     if (x && quantity) {
       setSelected(true);
-      handleChange({
+      updateRow(label, {
         ...x,
         transactionType: transactionType,
         product: 'NRML',
         quantity: parseInt(quantity),
       });
     }
-  }, [data, name, expiry, strikePrice, iType, transactionType, quantity, handleChange]);
+  }, [expiry, strikePrice, iType, transactionType, quantity]);
 
   const mapToStrikePrice = (stockArray) => {
     if (stockArray.length === 0) return [];
@@ -66,8 +64,15 @@ const StockInputForm = ({ label, handleChange }) => {
   return (
     <div className="input_container">
       <div className="input_element">
+        <MinusCircleTwoTone
+          onClick={() => deleteRow(label)}
+          twoToneColor={red[3]}
+          style={{ fontSize: '1.5rem' }}
+        />
+      </div>
+      <div className="input_element">
         <Button type="primary" size="large">
-          STOCK {label}:
+          STOCK {label + 1}:
         </Button>
       </div>
       <div className="input_element">
@@ -84,7 +89,6 @@ const StockInputForm = ({ label, handleChange }) => {
             return { label: d, value: d };
           })}
           onSelect={(newValue) => {
-            localStorage.setItem(`${label}.strikePrice`, newValue);
             setStrikePrice(newValue);
           }}
         ></Select>
@@ -100,7 +104,6 @@ const StockInputForm = ({ label, handleChange }) => {
             return { label: d, value: d };
           })}
           onSelect={(newValue) => {
-            localStorage.setItem(`${label}.expiry`, newValue);
             setExpiry(newValue);
           }}
         ></Select>
@@ -113,7 +116,6 @@ const StockInputForm = ({ label, handleChange }) => {
             return { label: d, value: d };
           })}
           onSelect={(newValue) => {
-            localStorage.setItem(`${label}.iType`, newValue);
             setIType(newValue);
           }}
         ></Select>
@@ -124,7 +126,6 @@ const StockInputForm = ({ label, handleChange }) => {
           value={quantity}
           min={0}
           onChange={(newValue) => {
-            localStorage.setItem(`${label}.quantity`, newValue);
             setQuantity(newValue);
           }}
         />

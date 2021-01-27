@@ -1,31 +1,50 @@
 import React, { useState } from 'react';
 import { Button, Divider, Result, message } from 'antd';
 import StockInputForm from './StockInputForm';
-import SelectedStock from './SelectedStock';
 import axios from 'axios';
 
+import { PlusCircleTwoTone } from '@ant-design/icons';
 import './InputForm.css';
 import './StockInputForm.css';
 
 const InputForm = () => {
   const [state, setState] = useState('initial');
 
-  const [stockA, setStockA] = useState();
-  const [stockB, setStockB] = useState();
-  const [stockC, setStockC] = useState();
+  const [stockArray, setStockArray] = useState([]);
 
   const proceedButton = () => {
-    if (!stockA || !stockB || !stockC) {
+    if (stockArray.some((s) => !s.tradingsymbol || !s.quantity)) {
       message.error(
         'One or more invalid stocks selected. Please select valid stocks and try again.',
       );
     } else {
       axios
-        .post(`http://localhost:4400/nineFifteenOrder`, { stockArray: [stockA, stockB, stockC] })
+        .post(`http://localhost:4400/nineFifteenOrder`, { stockArray })
         .then((data) => console.log(data))
         .catch((error) => console.error(error));
       setState('done');
     }
+  };
+
+  const addNewStock = () => {
+    let copiedStockArray = [...stockArray];
+    copiedStockArray.push({});
+    setStockArray(copiedStockArray);
+  };
+
+  const updateStockArray = (index, newStockData) => {
+    let copiedStockArray = [...stockArray];
+    copiedStockArray[index] = newStockData;
+    setStockArray(copiedStockArray);
+  };
+
+  const removeExistingStock = (index) => {
+    console.log('before: ', stockArray);
+    console.log(`Removing row ${index}`);
+    let copiedStockArray = [...stockArray];
+    copiedStockArray.splice(index, 1);
+    console.log('after: ', copiedStockArray);
+    setStockArray(copiedStockArray);
   };
 
   if (state === 'initial') {
@@ -33,23 +52,16 @@ const InputForm = () => {
       <>
         <div className="form_container">
           <Divider />
-          <StockInputForm label="A" handleChange={setStockA} />
+          {stockArray.map((stock, index) => (
+            <StockInputForm
+              key={index}
+              label={index}
+              updateRow={updateStockArray}
+              deleteRow={removeExistingStock}
+            />
+          ))}
+          <PlusCircleTwoTone style={{ fontSize: '2rem' }} onClick={addNewStock}></PlusCircleTwoTone>
           <Divider />
-          <StockInputForm label="B" handleChange={setStockB} />
-          <Divider />
-          <StockInputForm label="C" handleChange={setStockC} />
-          <Divider />
-        </div>
-        <div className="input_container">
-          <div className="input_element">
-            <SelectedStock input={'A'} data={stockA} />
-          </div>
-          <div className="input_element">
-            <SelectedStock input={'B'} data={stockB} />
-          </div>
-          <div className="input_element">
-            <SelectedStock input={'C'} data={stockC} />
-          </div>
         </div>
         <div className="input_container">
           <Button type="primary" size="large" onClick={proceedButton}>
