@@ -71,13 +71,13 @@ const nineFifteenOrder = async (stockArray) => {
   // Flag to determine if order is already placed or not
   let placedOrder = false;
 
-  // Current Time
-  const ct = new Date();
+  // Current Date
+  const cd = new Date();
   // Target Time
-  const tt = new Date(ct.getFullYear(), ct.getMonth(), ct.getDate(), 9, 15, 1);
+  const tt = new Date(cd.getFullYear(), cd.getMonth(), cd.getDate(), 9, 15, 0, 1).getTime();
 
   while (!placedOrder) {
-    if (tt.getTime() === new Date().getTime()) {
+    if (new Date().getTime() >= tt) {
       placedOrder = true;
       await placeOrder(stockArray, priceArray);
     }
