@@ -7,7 +7,8 @@ import './StockInputForm.css';
 import { blue, red } from '@ant-design/colors';
 
 const StockInputForm = ({ label, updateRow, deleteRow }) => {
-  const name = 'NIFTY';
+  const [names, setNames] = useState([]);
+  const [name, setName] = useState('NIFTY');
   const [selected, setSelected] = useState(false);
   const [data, setData] = useState([]);
   const [strikePrice, setStrikePrice] = useState('');
@@ -16,11 +17,17 @@ const StockInputForm = ({ label, updateRow, deleteRow }) => {
   const [iType, setIType] = useState('CE');
   const transactionType = 'BUY';
 
-  useEffect(() => {
-    axios.get('http://localhost:4400/mapper/byName', { params: { name: name } }).then((result) => {
-      setData(result.data);
-    });
+  useEffect(async () => {
+    const { data } = await axios.get('http://localhost:4400/mapper/names');
+    setNames(data);
   }, []);
+
+  useEffect(async () => {
+    const { data } = await axios.get('http://localhost:4400/mapper/byName', {
+      params: { name: name },
+    });
+    setData(data);
+  }, [name]);
 
   useEffect(() => {
     setSelected(false);
@@ -76,7 +83,19 @@ const StockInputForm = ({ label, updateRow, deleteRow }) => {
         </Button>
       </div>
       <div className="input_element">
-        <Select size="large" value={name} disabled></Select>
+        <Select
+          size="large"
+          showSearch
+          style={{ width: 200 }}
+          placeholder="Select Name"
+          value={name}
+          options={names.map((n) => {
+            return { label: n, value: n };
+          })}
+          onSelect={(newValue) => {
+            setName(newValue);
+          }}
+        ></Select>
       </div>
       <div className="input_element">
         <Select
