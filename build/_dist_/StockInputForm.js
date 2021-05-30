@@ -5,60 +5,29 @@ import axios2 from "../web_modules/axios.js";
 import "./StockInputForm.css.proxy.js";
 import {blue, red} from "../web_modules/@ant-design/colors.js";
 const StockInputForm2 = ({label, updateRow, deleteRow}) => {
-  const [names, setNames] = useState([]);
-  const [name, setName] = useState("NIFTY");
+  const [tradingSymbols, setTradingSymbols] = useState([]);
+  const [selectedTradingSymbol, setSelectedTradingSymbol] = useState(null);
   const [selected, setSelected] = useState(false);
-  const [data, setData] = useState([]);
-  const [strikePrice, setStrikePrice] = useState("");
-  const [expiry, setExpiry] = useState("");
+  const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(75);
-  const [iType, setIType] = useState("CE");
-  const transactionType = "BUY";
+  const [transactionType, setTransactionType] = useState("BUY");
   useEffect(async () => {
-    const {data: data2} = await axios2.get("http://localhost:4400/mapper/names");
-    setNames(data2);
+    const {data} = await axios2.get("http://localhost:4400/mapper/tradingSymbols");
+    setTradingSymbols(data);
   }, []);
   useEffect(async () => {
-    const {data: data2} = await axios2.get("http://localhost:4400/mapper/byName", {
-      params: {name}
-    });
-    setData(data2);
-  }, [name]);
-  useEffect(() => {
     setSelected(false);
-    const x = data.find((d) => d.tradingsymbol === `${name}${expiry}${strikePrice}${iType}`);
-    if (x && quantity) {
+    if (selectedTradingSymbol && quantity) {
       setSelected(true);
       updateRow(label, {
-        ...x,
+        tradingsymbol: selectedTradingSymbol,
         transactionType,
+        price,
         product: "NRML",
         quantity: parseInt(quantity)
       });
     }
-  }, [expiry, strikePrice, iType, transactionType, quantity]);
-  const mapToStrikePrice = (stockArray) => {
-    if (stockArray.length === 0)
-      return [];
-    let spSet = new Set();
-    stockArray.forEach((s) => {
-      spSet.add(s.strike.toString());
-    });
-    return [...spSet];
-  };
-  const mapToExpiry = (stockArray, name2, strikePrice2) => {
-    if (stockArray.length === 0)
-      return [];
-    let expirySet = new Set();
-    stockArray.filter((s) => s.strike.toString() === strikePrice2).forEach((s) => {
-      const ts = s.tradingsymbol;
-      const tsTrimmed = ts.substr(0, ts.lastIndexOf(strikePrice2));
-      const expiry2 = tsTrimmed.slice(name2.length);
-      if (expiry2)
-        expirySet.add(expiry2);
-    });
-    return [...expirySet];
-  };
+  }, [selectedTradingSymbol, transactionType, quantity]);
   return /* @__PURE__ */ React.createElement("div", {
     className: "input_container"
   }, /* @__PURE__ */ React.createElement("div", {
@@ -77,53 +46,26 @@ const StockInputForm2 = ({label, updateRow, deleteRow}) => {
   }, /* @__PURE__ */ React.createElement(Select, {
     size: "large",
     showSearch: true,
-    style: {width: 200},
+    style: {width: 300},
     placeholder: "Select Name",
-    value: name,
-    options: names.map((n) => {
+    value: selectedTradingSymbol,
+    options: tradingSymbols.map((n) => {
       return {label: n, value: n};
     }),
     onSelect: (newValue) => {
-      setName(newValue);
+      setSelectedTradingSymbol(newValue);
     }
   })), /* @__PURE__ */ React.createElement("div", {
     className: "input_element"
-  }, /* @__PURE__ */ React.createElement(Select, {
+  }, /* @__PURE__ */ React.createElement(InputNumber, {
     size: "large",
-    showSearch: true,
-    style: {width: 200},
-    placeholder: "Select Strike Price",
-    value: strikePrice,
-    options: mapToStrikePrice(data).map((d) => {
-      return {label: d, value: d};
-    }),
-    onSelect: (newValue) => {
-      setStrikePrice(newValue);
-    }
-  })), /* @__PURE__ */ React.createElement("div", {
-    className: "input_element"
-  }, /* @__PURE__ */ React.createElement(Select, {
-    size: "large",
-    showSearch: true,
-    style: {width: 150},
-    placeholder: "Select Expiry",
-    value: expiry,
-    options: mapToExpiry(data, name, strikePrice).map((d) => {
-      return {label: d, value: d};
-    }),
-    onSelect: (newValue) => {
-      setExpiry(newValue);
-    }
-  })), /* @__PURE__ */ React.createElement("div", {
-    className: "input_element"
-  }, /* @__PURE__ */ React.createElement(Select, {
-    size: "large",
-    value: iType,
-    options: ["CE", "PE"].map((d) => {
-      return {label: d, value: d};
-    }),
-    onSelect: (newValue) => {
-      setIType(newValue);
+    style: {width: 120},
+    formatter: (value) => `\u20B9 ${value}`,
+    step: 0.5,
+    value: price,
+    min: 0,
+    onChange: (newValue) => {
+      setPrice(newValue);
     }
   })), /* @__PURE__ */ React.createElement("div", {
     className: "input_element"
@@ -139,7 +81,12 @@ const StockInputForm2 = ({label, updateRow, deleteRow}) => {
   }, /* @__PURE__ */ React.createElement(Select, {
     size: "large",
     value: transactionType,
-    disabled: true
+    options: ["BUY", "SELL"].map((n) => {
+      return {label: n, value: n};
+    }),
+    onSelect: (newValue) => {
+      setTransactionType(newValue);
+    }
   })), selected ? /* @__PURE__ */ React.createElement(CheckCircleTwoTone, {
     style: {fontSize: "2rem"}
   }) : /* @__PURE__ */ React.createElement(CheckCircleTwoTone, {

@@ -43,9 +43,10 @@ app.use('/login', async (req, res) => {
     });
 
     // Populate list of instruments
+    const allowedExchanges = ['MCX', 'NSE', 'CDS', 'NFO'];
     const instruments = await kc.getInstruments();
-    const filteredInstruments = instruments.filter((i) => i.exchange === 'NFO');
-    fs.writeFileSync('instruments.json', JSON.stringify(filteredInstruments), (error) => {
+    const validInstruments = instruments.filter((i) => allowedExchanges.includes(i.exchange));
+    fs.writeFileSync('instruments.json', JSON.stringify(validInstruments), (error) => {
       if (error) console.log('Error while writing instruments', error);
     });
 

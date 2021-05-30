@@ -6,6 +6,8 @@ const cors = require('cors');
 const express = require('express');
 const KiteConnect = require('kiteconnect').KiteConnect;
 
+const instruments = require('./instruments.json');
+
 const app = express();
 const mapperRouter = require('./mapper');
 const http = require('http').createServer(app);
@@ -26,9 +28,9 @@ app.use(express.static(path.join(__dirname, 'build')));
 app.use('/mapper', mapperRouter);
 
 // Order function
-const order = (stock, price) => {
+const order = (stock) => {
   console.log(
-    `Placing order for ${stock.exchange}:${stock.tradingsymbol}, Transaction: ${stock.transactionType}, product: ${stock.product}, quantity: ${stock.quantity}, price: ${price}`,
+    `Placing order for ${stock.exchange}:${stock.tradingsymbol}, Transaction: ${stock.transactionType}, product: ${stock.product}, quantity: ${stock.quantity}, price: ${stock.price}`,
   );
   console.log(`Time of order: ${new Date().toLocaleTimeString()}`);
 
@@ -38,17 +40,13 @@ const order = (stock, price) => {
     transaction_type: stock.transactionType,
     quantity: stock.quantity,
     product: stock.product, // NRML
-    price: price, // Should be 0.05
+    price: price,
     order_type: 'LIMIT',
   });
 };
 
-const placeOrder = async (stockArray, priceArray) => {
-  const promiseArray = [];
-
-  for (let i = 0; i < stockArray.length; i++) {
-    promiseArray.push(order(stockArray[i], priceArray[i]));
-  }
+const placeOrder = async (stockArray) => {
+  const promiseArray = stockArray.map((s) => order(s));
 
   try {
     await Promise.all(promiseArray);
@@ -66,8 +64,12 @@ app.post('/nineFifteenOrder', async ({ body }, response) => {
 
 // 9:15 Order
 const nineFifteenOrder = async (stockArray) => {
-  const priceArray = new Array(stockArray.length).fill(0.05);
-
+  stockArray = stockArray.map((s) => {
+    return {
+      ...s,
+      exchange: instruments.find((i) => i.tradingsymbol === s.tradingsymbol).exchange,
+    };
+  });
   // Flag to determine if order is already placed or not
   let placedOrder = false;
 
@@ -79,7 +81,7 @@ const nineFifteenOrder = async (stockArray) => {
   while (!placedOrder) {
     if (new Date().getTime() >= tt) {
       placedOrder = true;
-      await placeOrder(stockArray, priceArray);
+      await placeOrder(stockArray);
     }
   }
 

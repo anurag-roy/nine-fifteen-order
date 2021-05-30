@@ -7,66 +7,32 @@ import './StockInputForm.css';
 import { blue, red } from '@ant-design/colors';
 
 const StockInputForm = ({ label, updateRow, deleteRow }) => {
-  const [names, setNames] = useState([]);
-  const [name, setName] = useState('NIFTY');
+  const [tradingSymbols, setTradingSymbols] = useState([]);
+  const [selectedTradingSymbol, setSelectedTradingSymbol] = useState(null);
   const [selected, setSelected] = useState(false);
-  const [data, setData] = useState([]);
-  const [strikePrice, setStrikePrice] = useState('');
-  const [expiry, setExpiry] = useState('');
+  const [price, setPrice] = useState(0.0);
   const [quantity, setQuantity] = useState(75);
-  const [iType, setIType] = useState('CE');
-  const transactionType = 'BUY';
+  const [transactionType, setTransactionType] = useState('BUY');
 
   useEffect(async () => {
-    const { data } = await axios.get('http://localhost:4400/mapper/names');
-    setNames(data);
+    const { data } = await axios.get('http://localhost:4400/mapper/tradingSymbols');
+    setTradingSymbols(data);
   }, []);
 
   useEffect(async () => {
-    const { data } = await axios.get('http://localhost:4400/mapper/byName', {
-      params: { name: name },
-    });
-    setData(data);
-  }, [name]);
-
-  useEffect(() => {
     setSelected(false);
-    const x = data.find((d) => d.tradingsymbol === `${name}${expiry}${strikePrice}${iType}`);
-    if (x && quantity) {
+
+    if (selectedTradingSymbol && quantity) {
       setSelected(true);
       updateRow(label, {
-        ...x,
+        tradingsymbol: selectedTradingSymbol,
         transactionType: transactionType,
+        price: price,
         product: 'NRML',
         quantity: parseInt(quantity),
       });
     }
-  }, [expiry, strikePrice, iType, transactionType, quantity]);
-
-  const mapToStrikePrice = (stockArray) => {
-    if (stockArray.length === 0) return [];
-
-    let spSet = new Set();
-    stockArray.forEach((s) => {
-      spSet.add(s.strike.toString());
-    });
-    return [...spSet];
-  };
-
-  const mapToExpiry = (stockArray, name, strikePrice) => {
-    if (stockArray.length === 0) return [];
-
-    let expirySet = new Set();
-    stockArray
-      .filter((s) => s.strike.toString() === strikePrice)
-      .forEach((s) => {
-        const ts = s.tradingsymbol;
-        const tsTrimmed = ts.substr(0, ts.lastIndexOf(strikePrice));
-        const expiry = tsTrimmed.slice(name.length);
-        if (expiry) expirySet.add(expiry);
-      });
-    return [...expirySet];
-  };
+  }, [selectedTradingSymbol, transactionType, quantity]);
 
   return (
     <div className="input_container">
@@ -86,58 +52,29 @@ const StockInputForm = ({ label, updateRow, deleteRow }) => {
         <Select
           size="large"
           showSearch
-          style={{ width: 200 }}
+          style={{ width: 300 }}
           placeholder="Select Name"
-          value={name}
-          options={names.map((n) => {
+          value={selectedTradingSymbol}
+          options={tradingSymbols.map((n) => {
             return { label: n, value: n };
           })}
           onSelect={(newValue) => {
-            setName(newValue);
+            setSelectedTradingSymbol(newValue);
           }}
         ></Select>
       </div>
       <div className="input_element">
-        <Select
+        <InputNumber
           size="large"
-          showSearch
-          style={{ width: 200 }}
-          placeholder="Select Strike Price"
-          value={strikePrice}
-          options={mapToStrikePrice(data).map((d) => {
-            return { label: d, value: d };
-          })}
-          onSelect={(newValue) => {
-            setStrikePrice(newValue);
+          style={{ width: 120 }}
+          formatter={(value) => `₹ ${value}`}
+          step={0.5}
+          value={price}
+          min={0.0}
+          onChange={(newValue) => {
+            setPrice(newValue);
           }}
-        ></Select>
-      </div>
-      <div className="input_element">
-        <Select
-          size="large"
-          showSearch
-          style={{ width: 150 }}
-          placeholder="Select Expiry"
-          value={expiry}
-          options={mapToExpiry(data, name, strikePrice).map((d) => {
-            return { label: d, value: d };
-          })}
-          onSelect={(newValue) => {
-            setExpiry(newValue);
-          }}
-        ></Select>
-      </div>
-      <div className="input_element">
-        <Select
-          size="large"
-          value={iType}
-          options={['CE', 'PE'].map((d) => {
-            return { label: d, value: d };
-          })}
-          onSelect={(newValue) => {
-            setIType(newValue);
-          }}
-        ></Select>
+        />
       </div>
       <div className="input_element">
         <InputNumber
@@ -150,7 +87,16 @@ const StockInputForm = ({ label, updateRow, deleteRow }) => {
         />
       </div>
       <div className="input_element">
-        <Select size="large" value={transactionType} disabled></Select>
+        <Select
+          size="large"
+          value={transactionType}
+          options={['BUY', 'SELL'].map((n) => {
+            return { label: n, value: n };
+          })}
+          onSelect={(newValue) => {
+            setTransactionType(newValue);
+          }}
+        ></Select>
       </div>
       {selected ? (
         <CheckCircleTwoTone style={{ fontSize: '2rem' }} />
