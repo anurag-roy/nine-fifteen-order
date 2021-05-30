@@ -5,7 +5,8 @@ import axios2 from "../web_modules/axios.js";
 import "./StockInputForm.css.proxy.js";
 import {blue, red} from "../web_modules/@ant-design/colors.js";
 const StockInputForm2 = ({label, updateRow, deleteRow}) => {
-  const name = "NIFTY";
+  const [names, setNames] = useState([]);
+  const [name, setName] = useState("NIFTY");
   const [selected, setSelected] = useState(false);
   const [data, setData] = useState([]);
   const [strikePrice, setStrikePrice] = useState("");
@@ -13,11 +14,16 @@ const StockInputForm2 = ({label, updateRow, deleteRow}) => {
   const [quantity, setQuantity] = useState(75);
   const [iType, setIType] = useState("CE");
   const transactionType = "BUY";
-  useEffect(() => {
-    axios2.get("http://localhost:4400/mapper/byName", {params: {name}}).then((result) => {
-      setData(result.data);
-    });
+  useEffect(async () => {
+    const {data: data2} = await axios2.get("http://localhost:4400/mapper/names");
+    setNames(data2);
   }, []);
+  useEffect(async () => {
+    const {data: data2} = await axios2.get("http://localhost:4400/mapper/byName", {
+      params: {name}
+    });
+    setData(data2);
+  }, [name]);
   useEffect(() => {
     setSelected(false);
     const x = data.find((d) => d.tradingsymbol === `${name}${expiry}${strikePrice}${iType}`);
@@ -70,8 +76,16 @@ const StockInputForm2 = ({label, updateRow, deleteRow}) => {
     className: "input_element"
   }, /* @__PURE__ */ React.createElement(Select, {
     size: "large",
+    showSearch: true,
+    style: {width: 200},
+    placeholder: "Select Name",
     value: name,
-    disabled: true
+    options: names.map((n) => {
+      return {label: n, value: n};
+    }),
+    onSelect: (newValue) => {
+      setName(newValue);
+    }
   })), /* @__PURE__ */ React.createElement("div", {
     className: "input_element"
   }, /* @__PURE__ */ React.createElement(Select, {
