@@ -40,7 +40,7 @@ const order = (stock) => {
     transaction_type: stock.transactionType,
     quantity: stock.quantity,
     product: stock.product, // NRML
-    price: price,
+    price: stock.price,
     order_type: 'LIMIT',
   });
 };
