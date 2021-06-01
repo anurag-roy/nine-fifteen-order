@@ -14,7 +14,7 @@ const InputForm = () => {
 
   const proceedButton = () => {
     console.log(stockArray);
-    if (stockArray.some((s) => !s.tradingsymbol || !s.price || !s.quantity || !s.transactionType)) {
+    if (stockArray.some((s) => !s.tradingsymbol || !s.quantity || !s.transactionType)) {
       message.error(
         'One or more invalid inputs selected. Please select valid inputs and try again.',
       );

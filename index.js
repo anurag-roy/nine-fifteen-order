@@ -59,7 +59,7 @@ const placeOrder = async (stockArray) => {
 app.post('/nineFifteenOrder', async ({ body }, response) => {
   console.log(body);
   response.send('Check console.');
-  // await nineFifteenOrder(body.stockArray);
+  await nineFifteenOrder(body.stockArray);
 });
 
 // 9:15 Order
