@@ -39,7 +39,7 @@ const order = (stock) => {
     tradingsymbol: stock.tradingsymbol,
     transaction_type: stock.transactionType,
     quantity: stock.quantity,
-    product: stock.product, // NRML
+    product: stock.product,
     price: stock.price,
     order_type: 'LIMIT',
   });
@@ -59,7 +59,7 @@ const placeOrder = async (stockArray) => {
 app.post('/nineFifteenOrder', async ({ body }, response) => {
   console.log(body);
   response.send('Check console.');
-  await nineFifteenOrder(body.stockArray);
+  // await nineFifteenOrder(body.stockArray);
 });
 
 // 9:15 Order

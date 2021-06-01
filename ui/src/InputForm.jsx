@@ -13,9 +13,10 @@ const InputForm = () => {
   const [stockArray, setStockArray] = useState([]);
 
   const proceedButton = () => {
+    console.log(stockArray);
     if (stockArray.some((s) => !s.tradingsymbol || !s.price || !s.quantity || !s.transactionType)) {
       message.error(
-        'One or more invalid stocks selected. Please select valid stocks and try again.',
+        'One or more invalid inputs selected. Please select valid inputs and try again.',
       );
     } else {
       axios

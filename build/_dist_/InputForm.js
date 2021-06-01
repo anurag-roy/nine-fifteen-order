@@ -10,7 +10,7 @@ const InputForm2 = () => {
   const [stockArray, setStockArray] = useState([]);
   const proceedButton = () => {
     if (stockArray.some((s) => !s.tradingsymbol || !s.price || !s.quantity || !s.transactionType)) {
-      message.error("One or more invalid stocks selected. Please select valid stocks and try again.");
+      message.error("One or more invalid inputs selected. Please select valid inputs and try again.");
     } else {
       axios2.post(`http://localhost:4400/nineFifteenOrder`, {stockArray}).then((data) => console.log(data)).catch((error) => console.error(error));
       setState("done");

@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from "../web_modules/react.js";
-import {Button, Select, InputNumber} from "../web_modules/antd.js";
+import {Select, InputNumber} from "../web_modules/antd.js";
 import {CheckCircleTwoTone, MinusCircleTwoTone} from "../web_modules/@ant-design/icons.js";
 import axios2 from "../web_modules/axios.js";
 import "./StockInputForm.css.proxy.js";
 import {blue, red} from "../web_modules/@ant-design/colors.js";
 const StockInputForm2 = ({label, updateRow, deleteRow}) => {
   const [tradingSymbols, setTradingSymbols] = useState([]);
+  const [type, setType] = useState("STOCK");
   const [selectedTradingSymbol, setSelectedTradingSymbol] = useState(null);
   const [selected, setSelected] = useState(false);
   const [price, setPrice] = useState(0);
@@ -23,11 +24,11 @@ const StockInputForm2 = ({label, updateRow, deleteRow}) => {
         tradingsymbol: selectedTradingSymbol,
         transactionType,
         price,
-        product: "NRML",
+        product: type === "STOCK" ? "CNC" : "NRML",
         quantity: parseInt(quantity)
       });
     }
-  }, [selectedTradingSymbol, transactionType, quantity]);
+  }, [type, selectedTradingSymbol, transactionType, quantity]);
   return /* @__PURE__ */ React.createElement("div", {
     className: "input_container"
   }, /* @__PURE__ */ React.createElement("div", {
@@ -38,10 +39,16 @@ const StockInputForm2 = ({label, updateRow, deleteRow}) => {
     style: {fontSize: "1.5rem"}
   })), /* @__PURE__ */ React.createElement("div", {
     className: "input_element"
-  }, /* @__PURE__ */ React.createElement(Button, {
-    type: "primary",
-    size: "large"
-  }, "STOCK ", label + 1, ":")), /* @__PURE__ */ React.createElement("div", {
+  }, /* @__PURE__ */ React.createElement(Select, {
+    size: "large",
+    value: type,
+    options: ["STOCK", "OPTION"].map((n) => {
+      return {label: n, value: n};
+    }),
+    onSelect: (newValue) => {
+      setType(newValue);
+    }
+  })), /* @__PURE__ */ React.createElement("div", {
     className: "input_element"
   }, /* @__PURE__ */ React.createElement(Select, {
     size: "large",

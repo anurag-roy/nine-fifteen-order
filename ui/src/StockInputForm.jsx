@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Select, InputNumber } from 'antd';
+import { Select, InputNumber } from 'antd';
 import { CheckCircleTwoTone, MinusCircleTwoTone } from '@ant-design/icons';
 import axios from 'axios';
 
@@ -8,9 +8,10 @@ import { blue, red } from '@ant-design/colors';
 
 const StockInputForm = ({ label, updateRow, deleteRow }) => {
   const [tradingSymbols, setTradingSymbols] = useState([]);
+  const [type, setType] = useState('STOCK');
   const [selectedTradingSymbol, setSelectedTradingSymbol] = useState(null);
   const [selected, setSelected] = useState(false);
-  const [price, setPrice] = useState(0.0);
+  const [price, setPrice] = useState(0.05);
   const [quantity, setQuantity] = useState(75);
   const [transactionType, setTransactionType] = useState('BUY');
 
@@ -28,11 +29,11 @@ const StockInputForm = ({ label, updateRow, deleteRow }) => {
         tradingsymbol: selectedTradingSymbol,
         transactionType: transactionType,
         price: price,
-        product: 'NRML',
+        product: type === 'STOCK' ? 'CNC' : 'NRML',
         quantity: parseInt(quantity),
       });
     }
-  }, [selectedTradingSymbol, transactionType, quantity]);
+  }, [type, selectedTradingSymbol, transactionType, price, quantity]);
 
   return (
     <div className="input_container">
@@ -44,9 +45,16 @@ const StockInputForm = ({ label, updateRow, deleteRow }) => {
         />
       </div>
       <div className="input_element">
-        <Button type="primary" size="large">
-          STOCK {label + 1}:
-        </Button>
+        <Select
+          size="large"
+          value={type}
+          options={['STOCK', 'OPTION'].map((n) => {
+            return { label: n, value: n };
+          })}
+          onSelect={(newValue) => {
+            setType(newValue);
+          }}
+        ></Select>
       </div>
       <div className="input_element">
         <Select
