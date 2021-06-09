@@ -27,32 +27,9 @@ app.use(express.static(path.join(__dirname, 'build')));
 
 app.use('/mapper', mapperRouter);
 
-// Order function
-const order = (stock) => {
-  console.log(
-    `Placing order for ${stock.exchange}:${stock.tradingsymbol}, Transaction: ${stock.transactionType}, product: ${stock.product}, quantity: ${stock.quantity}, price: ${stock.price}`,
-  );
-  console.log(`Time of order: ${new Date().toLocaleTimeString()}`);
-
-  return kc.placeOrder('regular', {
-    exchange: stock.exchange,
-    tradingsymbol: stock.tradingsymbol,
-    transaction_type: stock.transactionType,
-    quantity: stock.quantity,
-    product: stock.product,
-    price: stock.price,
-    order_type: 'LIMIT',
-  });
-};
-
-const placeOrder = async (stockArray) => {
-  const promiseArray = stockArray.map((s) => order(s));
-
-  try {
-    await Promise.all(promiseArray);
-    console.log('All orders were successful');
-  } catch (error) {
-    console.log('Some error occurred while placing orders: ', error);
+const placeOrder = (stockArray) => {
+  for (let i = 0; i < stockArray.length; i++) {
+    kc.placeOrder('regular', stockArray[i]);
   }
 };
 
@@ -68,6 +45,7 @@ const nineFifteenOrder = async (stockArray) => {
     return {
       ...s,
       exchange: instruments.find((i) => i.tradingsymbol === s.tradingsymbol).exchange,
+      order_type: 'LIMIT',
     };
   });
   // Flag to determine if order is already placed or not
@@ -76,12 +54,21 @@ const nineFifteenOrder = async (stockArray) => {
   // Current Date
   const cd = new Date();
   // Target Time
-  const tt = new Date(cd.getFullYear(), cd.getMonth(), cd.getDate(), 9, 15, 0, 1).getTime();
+  const tt = new Date(cd.getFullYear(), cd.getMonth(), cd.getDate(), 9, 14, 58, 0).getTime();
 
   while (!placedOrder) {
     if (new Date().getTime() >= tt) {
       placedOrder = true;
-      await placeOrder(stockArray);
+
+      // repeat with the interval of 1/2 second
+      // let orderTimerId = setInterval(() => placeOrder(stockArray), 500);
+      let orderTimerId = setInterval(() => console.log(new Date().getTime()), 500);
+
+      // after 5.5 seconds stop
+      setTimeout(() => {
+        clearInterval(orderTimerId);
+        console.log('Placed all orders');
+      }, 5500);
     }
   }
 

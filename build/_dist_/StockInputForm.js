@@ -9,7 +9,7 @@ const StockInputForm2 = ({label, updateRow, deleteRow}) => {
   const [type, setType] = useState("STOCK");
   const [selectedTradingSymbol, setSelectedTradingSymbol] = useState(null);
   const [selected, setSelected] = useState(false);
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState(0.05);
   const [quantity, setQuantity] = useState(75);
   const [transactionType, setTransactionType] = useState("BUY");
   useEffect(async () => {
@@ -28,7 +28,7 @@ const StockInputForm2 = ({label, updateRow, deleteRow}) => {
         quantity: parseInt(quantity)
       });
     }
-  }, [type, selectedTradingSymbol, transactionType, quantity]);
+  }, [type, selectedTradingSymbol, transactionType, price, quantity]);
   return /* @__PURE__ */ React.createElement("div", {
     className: "input_container"
   }, /* @__PURE__ */ React.createElement("div", {
