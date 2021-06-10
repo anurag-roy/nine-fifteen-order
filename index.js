@@ -29,7 +29,9 @@ app.use('/mapper', mapperRouter);
 
 const placeOrder = (stockArray) => {
   for (let i = 0; i < stockArray.length; i++) {
-    kc.placeOrder('regular', stockArray[i]);
+    kc.placeOrder('regular', stockArray[i])
+      .then((res) => console.log(res))
+      .catch((err) => console.error(err));
   }
 };
 
@@ -44,6 +46,7 @@ const nineFifteenOrder = async (stockArray) => {
   stockArray = stockArray.map((s) => {
     return {
       ...s,
+      transaction_type: s.transactionType,
       exchange: instruments.find((i) => i.tradingsymbol === s.tradingsymbol).exchange,
       order_type: 'LIMIT',
     };
