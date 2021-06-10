@@ -61,8 +61,7 @@ const nineFifteenOrder = async (stockArray) => {
       placedOrder = true;
 
       // repeat with the interval of 1/2 second
-      // let orderTimerId = setInterval(() => placeOrder(stockArray), 500);
-      let orderTimerId = setInterval(() => console.log(new Date().getTime()), 500);
+      let orderTimerId = setInterval(() => placeOrder(stockArray), 500);
 
       // after 5.5 seconds stop
       setTimeout(() => {
